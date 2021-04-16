@@ -1,18 +1,14 @@
 def add(memory, instruction_ptr, modes):
-    modes = modes.zfill(3)
-    addr1, addr2, target_addr = memory[instruction_ptr + 1 : instruction_ptr + 4]
-    val1 = addr1 if modes[-1] == "1" else memory[addr1]
-    val2 = addr2 if modes[-2] == "1" else memory[addr2]
+    *args, target_addr = memory[instruction_ptr + 1 : instruction_ptr + 4]
+    val1, val2 = read_with_modes(*args, memory=memory, modes=modes)
     memory[target_addr] = val1 + val2
 
     return instruction_ptr + 4
 
 
 def multiply(memory, instruction_ptr, modes):
-    modes = modes.zfill(3)
-    addr1, addr2, target_addr = memory[instruction_ptr + 1 : instruction_ptr + 4]
-    val1 = addr1 if modes[-1] == "1" else memory[addr1]
-    val2 = addr2 if modes[-2] == "1" else memory[addr2]
+    *args, target_addr = memory[instruction_ptr + 1 : instruction_ptr + 4]
+    val1, val2 = read_with_modes(*args, memory=memory, modes=modes)
     memory[target_addr] = val1 * val2
 
     return instruction_ptr + 4
@@ -26,19 +22,16 @@ def write(memory, instruction_ptr, modes):
 
 
 def output(memory, instruction_ptr, modes):
-    modes = modes.zfill(1)
-    addr1 = memory[instruction_ptr + 1]
-    val1 = memory[addr1] if modes[-1] == "0" else addr1
+    args = memory[instruction_ptr + 1 : instruction_ptr + 2]
+    (val1,) = read_with_modes(*args, memory=memory, modes=modes)
     print(f"Output: {val1}")
 
     return instruction_ptr + 2
 
 
 def jump_if_true(memory, instruction_ptr, modes):
-    modes = modes.zfill(2)
-    addr1, addr2 = memory[instruction_ptr + 1 : instruction_ptr + 3]
-    val1 = addr1 if modes[-1] == "1" else memory[addr1]
-    val2 = addr2 if modes[-2] == "1" else memory[addr2]
+    args = memory[instruction_ptr + 1 : instruction_ptr + 3]
+    val1, val2 = read_with_modes(*args, memory=memory, modes=modes)
 
     if val1 != 0:
         return val2
@@ -47,10 +40,8 @@ def jump_if_true(memory, instruction_ptr, modes):
 
 
 def jump_if_false(memory, instruction_ptr, modes):
-    modes = modes.zfill(2)
-    addr1, addr2 = memory[instruction_ptr + 1 : instruction_ptr + 3]
-    val1 = addr1 if modes[-1] == "1" else memory[addr1]
-    val2 = addr2 if modes[-2] == "1" else memory[addr2]
+    args = memory[instruction_ptr + 1 : instruction_ptr + 3]
+    val1, val2 = read_with_modes(*args, memory=memory, modes=modes)
 
     if val1 == 0:
         return val2
@@ -59,23 +50,22 @@ def jump_if_false(memory, instruction_ptr, modes):
 
 
 def less_than(memory, instruction_ptr, modes):
-    modes = modes.zfill(3)
-    addr1, addr2, target_addr = memory[instruction_ptr + 1 : instruction_ptr + 4]
-    val1 = addr1 if modes[-1] == "1" else memory[addr1]
-    val2 = addr2 if modes[-2] == "1" else memory[addr2]
+    *args, target_addr = memory[instruction_ptr + 1 : instruction_ptr + 4]
+    val1, val2 = read_with_modes(*args, memory=memory, modes=modes)
 
     memory[target_addr] = int(val1 < val2)
     return instruction_ptr + 4
 
 
 def equals(memory, instruction_ptr, modes):
-    modes = modes.zfill(3)
-    addr1, addr2, target_addr = memory[instruction_ptr + 1 : instruction_ptr + 4]
-    val1 = addr1 if modes[-1] == "1" else memory[addr1]
-    val2 = addr2 if modes[-2] == "1" else memory[addr2]
-
+    *args, target_addr = memory[instruction_ptr + 1 : instruction_ptr + 4]
+    val1, val2 = read_with_modes(*args, memory=memory, modes=modes)
     memory[target_addr] = int(val1 == val2)
     return instruction_ptr + 4
+
+
+def read_with_modes(*args, memory, modes):
+    return [memory[v] if m == "0" else v for v, m in zip(args, modes[::-1])]
 
 
 # Mapping opcodes to functions
@@ -93,9 +83,10 @@ instructions = {
 
 def parse_instruction(instruction):
     instruction = str(instruction)
-    opcode = instruction[-2:]
-    modes = instruction[:-2]
-    return int(opcode), modes
+    opcode = int(instruction[-2:])
+    # Assuming that 3 parameters are maximum
+    modes = instruction[:-2].zfill(3)
+    return opcode, modes
 
 
 def run(memory):
