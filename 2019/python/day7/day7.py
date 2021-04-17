@@ -30,8 +30,7 @@ def write(memory, instruction_ptr, modes, external_input=None):
 def output(memory, instruction_ptr, modes):
     args = memory[instruction_ptr + 1 : instruction_ptr + 2]
     (val1,) = read_with_modes(*args, memory=memory, modes=modes)
-    print(f"Output: {val1}")
-    return val1
+    return instruction_ptr + 2, val1
 
 
 def jump_if_true(memory, instruction_ptr, modes):
@@ -73,6 +72,46 @@ def read_with_modes(*args, memory, modes):
     return [memory[v] if m == "0" else v for v, m in zip(args, modes[::-1])]
 
 
+class Computer:
+    """An IntCode computer."""
+
+    def __init__(self, program, inputs=None):
+        self.memory = program.copy()
+        self.inputs = inputs
+        self.instruction_ptr = 0
+        self.output = None
+        self.finished = False
+
+    def run(
+        self,
+    ):
+        while True:
+            opcode, modes = parse_instruction(self.memory[self.instruction_ptr])
+            if opcode == 99:
+                self.finished = True
+                return self.output
+            elif opcode == 3:
+                # If there are no inputs left, pause the computer
+                try:
+                    self.instruction_ptr = write(
+                        self.memory,
+                        self.instruction_ptr,
+                        modes,
+                        external_input=next(self.inputs),
+                    )
+                except StopIteration:
+                    return self.output
+
+            elif opcode == 4:
+                self.instruction_ptr, self.output = output(
+                    self.memory, self.instruction_ptr, modes
+                )
+            else:
+                self.instruction_ptr = instructions[opcode](
+                    self.memory, self.instruction_ptr, modes
+                )
+
+
 # Mapping opcodes to functions
 instructions = {
     1: add,
@@ -94,25 +133,6 @@ def parse_instruction(instruction):
     return opcode, modes
 
 
-def run(memory, inputs):
-    instruction_ptr = 0
-
-    while True:
-        opcode, modes = parse_instruction(memory[instruction_ptr])
-        if opcode == 99:
-            break
-        elif opcode == 3:
-            instruction_ptr = write(
-                memory, instruction_ptr, modes, external_input=next(inputs)
-            )
-        elif opcode == 4:
-            return output(memory, instruction_ptr, modes)
-        else:
-            instruction_ptr = instructions[opcode](memory, instruction_ptr, modes)
-
-    return memory
-
-
 with open("input", "r") as f:
     program = list(map(int, f.read().split(",")))
 
@@ -120,9 +140,30 @@ max_output = 0
 for phase_order in itertools.permutations(range(5)):
     amplifier_input = 0
     for phase in phase_order:
-        amplifier_input = run(program.copy(), inputs=iter([phase, amplifier_input]))
+        amplifier_input = Computer(program, inputs=iter([phase, amplifier_input])).run()
     if amplifier_input > max_output:
         max_output = amplifier_input
         max_order = phase_order
+
+print(max_output)
+
+
+max_output = 0
+for phase_order in itertools.permutations(range(5, 10)):
+    amplifier_input = 0
+    amps = [Computer(program) for _ in range(5)]
+    # First round with phase order
+    for amp, phase in zip(amps, phase_order):
+        amp.inputs = iter([phase, amplifier_input])
+        amplifier_input = amp.run()
+
+    # Only the amplifier inputs
+    for amp in itertools.cycle(amps):
+        amp.inputs = iter([amplifier_input])
+        amplifier_input = amp.run()
+        if all(map(lambda x: x.finished, amps)):
+            break
+    if amplifier_input > max_output:
+        max_output = amplifier_input
 
 print(max_output)
