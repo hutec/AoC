@@ -22,6 +22,7 @@ class Computer:
             6: self.jump_if_false_op,
             7: self.less_than_op,
             8: self.equals_op,
+            9: self.adjust_relativ_base_op,
         }
 
     def __getitem__(self, key):
@@ -107,38 +108,14 @@ class Computer:
         self[(3, modes[2])] = int(self[(1, modes[0])] == self[(2, modes[1])])
         self.ptr += 4
 
+    def adjust_relativ_base_op(self, modes):
+        self.relative_base += self[(1, modes[0])]
+        self.ptr += 2
+
 
 with open("input", "r") as f:
     program = list(map(int, f.read().split(",")))
 
-max_output = 0
-for phase_order in itertools.permutations(range(5)):
-    amplifier_input = 0
-    for phase in phase_order:
-        amplifier_input = Computer(program, inputs=iter([phase, amplifier_input])).run()
-    if amplifier_input > max_output:
-        max_output = amplifier_input
-        max_order = phase_order
-
-print(max_output)
-
-
-max_output = 0
-for phase_order in itertools.permutations(range(5, 10)):
-    amplifier_input = 0
-    amps = [Computer(program) for _ in range(5)]
-    # First round with phase order
-    for amp, phase in zip(amps, phase_order):
-        amp.inputs = iter([phase, amplifier_input])
-        amplifier_input = amp.run()
-
-    # Only the amplifier inputs
-    for amp in itertools.cycle(amps):
-        amp.inputs = iter([amplifier_input])
-        amplifier_input = amp.run()
-        if all(map(lambda x: x.finished, amps)):
-            break
-    if amplifier_input > max_output:
-        max_output = amplifier_input
-
-print(max_output)
+program = dict(zip(range(len(program)), program))
+print(Computer(program, inputs=iter([1])).run())
+print(Computer(program, inputs=iter([2])).run())
