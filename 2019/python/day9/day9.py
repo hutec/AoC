@@ -1,6 +1,3 @@
-import itertools
-
-
 class Computer:
     """An IntCode computer."""
 
@@ -8,7 +5,7 @@ class Computer:
         self.memory = program.copy()
         self.ptr = 0
         self.relative_base = 0
-        self.inputs = inputs
+        self.inputs = inputs or []
         self.output = None
         self.finished = False
 
@@ -60,7 +57,7 @@ class Computer:
                 return self.output
             try:
                 self.instructions[opcode](modes)
-            except StopIteration:
+            except IndexError:
                 return self.output
 
     def get_instruction(self):
@@ -80,7 +77,7 @@ class Computer:
         self.ptr += 4
 
     def write_op(self, modes):
-        _input = next(self.inputs)
+        _input = self.inputs.pop(0)
         self[(1, modes[0])] = _input
         self.ptr += 2
 
@@ -117,5 +114,5 @@ with open("input", "r") as f:
     program = list(map(int, f.read().split(",")))
 
 program = dict(zip(range(len(program)), program))
-print(Computer(program, inputs=iter([1])).run())
-print(Computer(program, inputs=iter([2])).run())
+print(Computer(program, inputs=[1]).run())
+print(Computer(program, inputs=[2]).run())
