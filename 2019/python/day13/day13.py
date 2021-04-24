@@ -64,7 +64,7 @@ class Computer:
             try:
                 self.instructions[opcode](modes)
             except IndexError:
-                return self.output
+                return None
             if opcode == 4:
                 return self.output
 
@@ -118,6 +118,55 @@ class Computer:
         self.ptr += 2
 
 
+tile_symbols = {
+    0: " ",
+    1: "|",
+    2: "#",
+    3: "-",
+    4: "o",
+}
+
+
+def display(screen):
+    xs, ys = zip(*screen)
+    for y in range(max(ys) + 1):
+        row = []
+        for x in range(max(xs) + 1):
+            row.append(tile_symbols[screen[(x, y)]])
+        print("".join(row))
+
+
+def joystick_input():
+    i = input("?")
+    if i == "j":
+        return -1
+    elif i == "k":
+        return 0
+    elif i == "l":
+        return 1
+
+
+def read_screen(computer, screen={}):
+    score = None
+    while not computer.finished:
+        x = computer.run()
+        if x is None:
+            # read the full screen
+            computer.inputs = [joystick_input()]
+            break
+
+        y = computer.run()
+        tile_id = computer.run()
+
+        if (x, y) == (-1, 0):
+            score = tile_id
+            print(f"Score is {tile_id}")
+
+        screen[(x, y)] = tile_id
+
+    return screen, score
+
+
 with open("input", "r") as f:
     program_ = list(map(int, f.read().split(",")))
 
@@ -125,11 +174,14 @@ program = defaultdict(lambda: 0)
 program.update(dict(zip(range(len(program_)), program_)))
 computer = Computer(program)
 
-screen = {}
-while not computer.finished:
-    x = computer.run()
-    y = computer.run()
-    tile_id = computer.run()
-    screen[(x, y)] = tile_id
+screen, _ = read_screen(computer)
 
 print(sum(map(lambda id: id == 2, screen.values())))
+
+computer = Computer(program)
+computer.memory[0] = 2
+
+screen = {}
+while not computer.finished:
+    screen, score = read_screen(computer, screen)
+    display(screen)
