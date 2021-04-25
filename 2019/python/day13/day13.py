@@ -1,3 +1,4 @@
+import os
 import itertools
 from operator import add
 from collections import defaultdict
@@ -137,34 +138,14 @@ def display(screen):
 
 
 def joystick_input():
-    i = input("?")
-    if i == "j":
-        return -1
-    elif i == "k":
-        return 0
-    elif i == "l":
-        return 1
-
-
-def read_screen(computer, screen={}):
-    score = None
-    while not computer.finished:
-        x = computer.run()
-        if x is None:
-            # read the full screen
-            computer.inputs = [joystick_input()]
-            break
-
-        y = computer.run()
-        tile_id = computer.run()
-
-        if (x, y) == (-1, 0):
-            score = tile_id
-            print(f"Score is {tile_id}")
-
-        screen[(x, y)] = tile_id
-
-    return screen, score
+    while True:
+        i = input("?")
+        if i == "j":
+            return -1
+        elif i == "k":
+            return 0
+        elif i == "l":
+            return 1
 
 
 with open("input", "r") as f:
@@ -174,14 +155,66 @@ program = defaultdict(lambda: 0)
 program.update(dict(zip(range(len(program_)), program_)))
 computer = Computer(program)
 
-screen, _ = read_screen(computer)
+screen = dict()
+
+# Task 1
+while not computer.finished:
+    x = computer.run()
+    y = computer.run()
+    tile_id = computer.run()
+    screen[(x, y)] = tile_id
 
 print(sum(map(lambda id: id == 2, screen.values())))
 
+# Task 2
 computer = Computer(program)
 computer.memory[0] = 2
 
-screen = {}
+if os.path.exists("replay"):
+    with open("replay", "r") as fp:
+        replay = fp.readlines()
+        skip = int(input("Skip last n: "))
+        replay = replay[:-skip]
+else:
+    replay = []
+record = []
+
+score = None
 while not computer.finished:
-    screen, score = read_screen(computer, screen)
+    while computer.get_instruction()[0] != 3:
+        x = computer.run()
+        y = computer.run()
+        tile_id = computer.run()
+
+        if x is None:
+            break
+
+        if (x, y) == (-1, 0):
+            if score != 0 and tile_id == 0:
+                break
+
+            score = tile_id
+            print(f"Score is {tile_id}")
+        else:
+            screen[(x, y)] = tile_id
+
     display(screen)
+    print(score)
+
+    # Manually run the input step
+    opcode, modes = computer.get_instruction()
+    if opcode == 99:
+        break
+    else:
+        if replay:
+            inputs = int(replay.pop(0))
+        else:
+            inputs = joystick_input()
+
+        record.append(f"{inputs}\n")
+        computer.inputs = [inputs]
+        computer.instructions[opcode](modes)
+
+with open("replay", "w") as fp:
+    for r in record:
+        fp.write(f"{r}")
