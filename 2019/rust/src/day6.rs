@@ -23,9 +23,9 @@ pub fn main() {
         orbits.insert(orbiter, center);
     }
 
-    let mut count = 0;
-    for (o, _) in &orbits {
-        count += count_orbits(&orbits, o, 0);
-    }
+    let count = orbits
+        .keys()
+        .map(|k| count_orbits(&orbits, k, 0))
+        .sum::<i32>();
     println!("Result Task 1: {}", count);
 }
