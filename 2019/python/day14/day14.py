@@ -66,6 +66,18 @@ def find_ore(required: RequiredChemicals):
 
 required = RequiredChemicals({"FUEL": 1})
 ore_per_fuel = find_ore(required)
-print(ore_per_fuel)
+print(f"Result task 1: {ore_per_fuel}")
 
-# TODO: Binary search for part two
+target = 1000000000000
+lower = target // ore_per_fuel
+upper = lower * 2
+while True:
+    mid = lower + (upper - lower) // 2
+    ore = find_ore(RequiredChemicals({"FUEL": mid}))
+    if abs(upper - lower) <= 1:
+        print(f"Result task 2: {mid}")
+        break
+    if ore < target:
+        lower = mid
+    else:
+        upper = mid
