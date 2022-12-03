@@ -26,7 +26,6 @@ fn what_to_pick(outcome: &Outcome, shape: &Shape) -> Shape {
         (Outcome::Loss, Shape::Paper) => Shape::Rock,
         (Outcome::Loss, Shape::Scissors) => Shape::Paper,
         (Outcome::Draw, shape) => shape.clone(),
-        _ => panic!("Invalid outcome"),
     }
 }
 
