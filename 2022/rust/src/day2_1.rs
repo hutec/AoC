@@ -57,15 +57,14 @@ pub fn parse(symbol: &str) -> Shape {
 
 pub fn main() {
     let lines: String = fs::read_to_string("../inputs/day02").expect("Can't read file");
-    // Iterate over all lines and split into two values
-    let mut total_score: i32 = 0;
-    for line in lines.lines() {
-        let parts: Vec<&str> = line.split_whitespace().collect();
-        let player1 = parse(parts[0]);
-        let player2 = parse(parts[1]);
-        total_score += score_outcome(&duel(&player2, &player1)) + score_shape(&player2);
-    }
-
-    // Print total score
+    let total_score = lines
+        .lines()
+        .map(|line| {
+            let mut line = line.split(" ");
+            let player1 = parse(line.next().unwrap());
+            let player2 = parse(line.next().unwrap());
+            score_outcome(&duel(&player1, &player2)) + score_shape(&player2)
+        })
+        .sum::<i32>();
     println!("Day 2 | Total score: {}", total_score);
 }

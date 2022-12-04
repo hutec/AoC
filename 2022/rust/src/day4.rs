@@ -17,9 +17,8 @@ impl Range {
 
 pub fn main() {
     let lines: String = fs::read_to_string("../inputs/day04").expect("Can't read file");
-    let lines: Vec<&str> = lines.lines().collect();
     let (contain_count, overlap_count) = lines
-        .iter()
+        .lines()
         .map(|line| {
             let mut ranges: Vec<Range> = Vec::new();
             for range in line.split(",") {
