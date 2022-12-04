@@ -23,7 +23,7 @@ fn part1(lines: &Vec<&str>) {
         priority_sum += priority(shared_item);
     }
 
-    println!("Priority sum: {}", priority_sum);
+    println!("Day 3 | Priority sum: {}", priority_sum);
 }
 
 fn part2(lines: &Vec<&str>) {
@@ -40,7 +40,7 @@ fn part2(lines: &Vec<&str>) {
         priority_sum += priority(shared_item.clone());
     }
 
-    println!("Priority sum: {}", priority_sum);
+    println!("Day 3 | Priority sum: {}", priority_sum);
 }
 
 pub fn main() {

@@ -41,5 +41,5 @@ pub fn main() {
         total_score += score_outcome(&target_outcome) + score_shape(&shape);
     }
 
-    println!("Total score: {}", total_score);
+    println!("Day 2 | Total score: {}", total_score);
 }

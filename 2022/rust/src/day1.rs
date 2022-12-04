@@ -15,10 +15,10 @@ pub fn main() {
         }
     }
     let max_calories = calories_per_elf.iter().max_by_key(|entry| entry.1).unwrap();
-    println!("Max calories: {:?}", max_calories);
+    println!("Day 1 | Max calories: {:?}", max_calories);
 
     let mut calories: Vec<i32> = calories_per_elf.values().cloned().collect();
     calories.sort();
     let top_three = calories.iter().rev().take(3).sum::<i32>();
-    println!("Top three: {}", top_three);
+    println!("Day 1 | Top three: {}", top_three);
 }

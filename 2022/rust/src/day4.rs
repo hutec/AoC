@@ -44,6 +44,6 @@ pub fn main() {
             },
         );
 
-    println!("Contain count: {}", contain_count);
-    println!("Overlap count: {}", overlap_count);
+    println!("Day 4 | Contain count: {}", contain_count);
+    println!("Day 4 | Overlap count: {}", overlap_count);
 }

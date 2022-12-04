@@ -67,5 +67,5 @@ pub fn main() {
     }
 
     // Print total score
-    println!("Total score: {}", total_score);
+    println!("Day 2 | Total score: {}", total_score);
 }
