@@ -1,5 +1,4 @@
-from enum import Enum, auto
-from typing import Union, List
+from typing import List
 from dataclasses import dataclass
 
 with open("../inputs/day07", "r") as f:
