@@ -1,6 +1,5 @@
 import operator
-from collections import defaultdict
-from itertools import starmap
+from typing import Tuple
 
 with open("../inputs/day09", "r") as f:
     seq = f.read()
@@ -13,32 +12,34 @@ directions = {
     "D": (-1, 0),
 }
 
-visited = set()
-head = tail = (0, 0)  # (y , x)
 
-
-def is_adjacent(pos1, pos2) -> bool:
+def is_adjacent(pos1: Tuple[int, int], pos2: Tuple[int, int]) -> bool:
     return abs(pos1[0] - pos2[0]) <= 1 and abs(pos1[1] - pos2[1]) <= 1
 
 
-def add(t1, t2):
-    return tuple(starmap(operator.add, zip(t1, t2)))
+def add(pos1: Tuple[int, int], pos2: Tuple[int, int]) -> Tuple[int, int]:
+    return tuple(map(operator.add, pos1, pos2))
 
 
-for line in lines:
-    if line:
+def simulate(lines: list, length: int) -> int:
+    visited = set()
+    knots = [(0, 0)] * length
+
+    for line in lines:
         d, steps = line.split(" ")
-    else:
-        break
+        for _ in range(int(steps)):
+            knots[0] = add(knots[0], directions[d])
+            for i in range(1, len(knots)):
+                if not is_adjacent(knots[i], knots[i - 1]):
+                    dy = knots[i - 1][0] - knots[i][0]
+                    dx = knots[i - 1][1] - knots[i][1]
+                    dy = dy // abs(dy) if dy != 0 else 0
+                    dx = dx // abs(dx) if dx != 0 else 0
+                    knots[i] = add(knots[i], (dy, dx))
 
-    for _ in range(int(steps)):
-        head = add(head, directions[d])
-        if not is_adjacent(head, tail):
-            dy, dx = head[0] - tail[0], head[1] - tail[1]
-            dy = dy // abs(dy) if dy != 0 else 0
-            dx = dx // abs(dx) if dx != 0 else 0
-            tail = add(tail, (dy, dx))
+            visited.add(knots[-1])
+    return len(visited)
 
-        visited.add(tail)
 
-print(f"Visited {len(visited)} cells.")
+print(simulate(lines, length=2))
+print(simulate(lines, length=10))
