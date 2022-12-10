@@ -23,7 +23,7 @@ for row in range(6):
         cycle = row * 40 + col
         sprite_position = register[cycle]
         if sprite_position - 1 <= col <= sprite_position + 1:
-            screen += "#"
+            screen += "##"
         else:
-            screen += "."
+            screen += "  "
     print(screen)
