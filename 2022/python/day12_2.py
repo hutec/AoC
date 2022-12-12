@@ -1,3 +1,8 @@
+"""
+* Compared to day12_1.py, start at "E" and work backwards.
+* `find_locations` is now an iterator.
+* Some locations might be unreachable, so we do `costs.get(goal, 9999999)`. 
+"""
 from typing import Tuple, List, Iterable
 import heapq
 
@@ -22,7 +27,7 @@ def get_neighbors(grid: List[List[int]], pos: Tuple[int, int]) -> List[Tuple[int
     return neighbors
 
 
-def find_location(grid: List[List[int]], target: int) -> Iterable[Tuple[int, int]]:
+def find_locations(grid: List[List[int]], target: int) -> Iterable[Tuple[int, int]]:
     for y in range(len(grid)):
         for x in range(len(grid[0])):
             if grid[y][x] == target:
@@ -37,7 +42,7 @@ grid = [list(map(elevation, line)) for line in lines]
 
 
 def dijsktra(grid):
-    source = next(find_location(grid, ord("z") + 1))
+    source = next(find_locations(grid, ord("z") + 1))
     frontier = []
     heapq.heappush(frontier, (0, source))
     came_from = {source: None}
@@ -58,5 +63,5 @@ def dijsktra(grid):
 
 _, costs = dijsktra(grid)
 
-m = min(costs.get(goal, 9999999) for goal in find_location(grid, ord("a")))
+m = min(costs.get(goal, 9999999) for goal in find_locations(grid, ord("a")))
 print(m)
