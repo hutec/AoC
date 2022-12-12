@@ -55,17 +55,20 @@ def parse(lines: List[str]) -> Monkey:
     )
 
 
-i = 0
-while (i * 7) < len(lines):
-    monkeys[i] = parse(lines[(i * 7) + 1 : (i * 7) + 6])
-    i += 1
+def main():
+    i = 0
+    while (i * 7) < len(lines):
+        monkeys[i] = parse(lines[(i * 7) + 1 : (i * 7) + 6])
+        i += 1
 
-for _ in range(20):
-    for i in range(len(monkeys)):
-        monkey = monkeys[i]
-        monkey.turn(monkeys)
+    for _ in range(20):
+        for monkey in monkeys.values():
+            monkey.turn(monkeys)
+
+    activity_counts = [monkey.activities for monkey in monkeys.values()]
+    monkey_buiness = operator.mul(*sorted(activity_counts)[-2:])
+    print(f"Level of monkey business: {monkey_buiness}")
 
 
-activity_counts = [monkey.activities for monkey in monkeys.values()]
-monkey_buiness = operator.mul(*sorted(activity_counts)[-2:])
-print(f"Level of monkey business: {monkey_buiness}")
+if __name__ == "__main__":
+    main()
