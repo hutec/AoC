@@ -17,7 +17,7 @@ class Monkey:
         while self.items:
             self.activities += 1
             worry_level = self.items.pop(0)
-            current_worry_level = self.operation(worry_level)
+            current_worry_level = self.operation(worry_level) // 3
             if (current_worry_level % self.test_divisibly_by) == 0:
                 monkeys[self.if_true_throw_to].items.append(current_worry_level)
             else:
