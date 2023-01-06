@@ -32,14 +32,21 @@ def max_y(grid: dict) -> int:
     return max([k[1] for k, v in grid.items() if v is True])
 
 
-def print_grid(grid):
-    for y in range(max_y(grid), 0, -1):
-        for x in range(7):
-            if grid[(x, y)]:
-                print("#", end="")
-            else:
-                print(".", end="")
-        print()
+def grid_to_list(grid):
+
+    return [
+        int("".join(map(str, [int(grid[(x, y)]) for x in range(7)])), 2)
+        for y in range(max_y(grid), 0, -1)
+    ]
+
+
+def find_cycle(t: list):
+    """Find the cycle in a list of integers."""
+    for i in range(10, len(t), 2):
+        half = i // 2
+        if t[:half] == t[half : 2 * half]:
+            return half
+    return None
 
 
 rocks = [
@@ -65,32 +72,42 @@ def main():
         jets = cycle(f.read())
 
     n_rocks = 0
-    while True:
-        for rock in rocks:
-            xy = (2, max_y(grid) + 4)
-            while True:
-                # Move horizontally
-                jet = next(jets)
-                if jet == ">":
-                    dx = 1 if xy[0] + rock.width < 7 else 0
-                elif jet == "<":
-                    dx = -1 if xy[0] > 0 else 0
+    for rock in cycle(rocks):
+        m = max_y(grid)
+        xy = (2, m + 4)
+        while True:
+            # Move horizontally
+            jet = next(jets)
+            if jet == ">":
+                dx = 1 if xy[0] + rock.width < 7 else 0
+            elif jet == "<":
+                dx = -1 if xy[0] > 0 else 0
 
-                if rock.check_collision(add(xy, (dx, 0)), grid) is False:
-                    xy = add(xy, (dx, 0))
+            if rock.check_collision(add(xy, (dx, 0)), grid) is False:
+                xy = add(xy, (dx, 0))
 
-                # Move vertically
-                if rock.check_collision(add(xy, (0, -1)), grid) is False:
-                    xy = add(xy, (0, -1))
-                else:
-                    rock.solidify(xy, grid)
-                    break
+            # Move vertically
+            if rock.check_collision(add(xy, (0, -1)), grid) is False:
+                xy = add(xy, (0, -1))
+            else:
+                rock.solidify(xy, grid)
+                break
 
-            n_rocks += 1
+        if n_rocks == 2022:
+            print(m)
 
-            if n_rocks == 2022:
-                print(max_y(grid))
-                exit()
+        n_rocks += 1
+
+        # two cylce, n_rocks = 3719
+        # three cycles,  n_rocks = 5466, max_y = 8686
+        # four cycles, n_rocks = 7210
+        # five cycles, n_rocks = 8954
+        # six cycle, n_rocks = 10698
+        # +350 base
+
+        # every 1744 rocks, there is a cycle that adds 2778 height
+
+        # First try was 1592889908236
 
 
 if __name__ == "__main__":
