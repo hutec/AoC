@@ -1,19 +1,24 @@
+use lazy_static::lazy_static;
 use regex::Regex;
 use std::fs;
+
+lazy_static! {
+    static ref FORWARD_RE: Regex =
+        Regex::new(r"([1-9]|one|two|three|four|five|six|seven|eight|nine)").unwrap();
+    static ref BACKWARD_RE: Regex =
+        Regex::new(r"([1-9]|eno|owt|eerht|ruof|evif|xis|neves|thgie|enin)").unwrap();
+}
 
 fn part2(line: &str) -> u32 {
     // Find the first number
     // Number is either 1-9, or one, two three, ..., nine
-    let forward_re = Regex::new(r"([1-9]|one|two|three|four|five|six|seven|eight|nine)").unwrap();
-    let backward_re: Regex =
-        Regex::new(r"([1-9]|eno|owt|eerht|ruof|evif|xis|neves|thgie|enin)").unwrap();
 
     // Find first occurence of forward regex
-    let first = forward_re.find(line).unwrap();
+    let first = FORWARD_RE.find(line).unwrap();
     // Find last occurence of backward regex
     // Reverse line
     let reverse_line = line.chars().rev().collect::<String>();
-    let last = backward_re.find(&reverse_line).unwrap();
+    let last = BACKWARD_RE.find(&reverse_line).unwrap();
 
     // Map match to number
     let first_number = match first.as_str() {
